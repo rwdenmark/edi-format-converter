@@ -1,0 +1,22 @@
+server:
+  port: ${PORT:8080}
+  tomcat:
+    # Real 837 batches can exceed Tomcat's 2MB default body size. 10MB covers typical
+    # payer batches without giving an attacker license to DoS the JVM.
+    max-http-form-post-size: 10MB
+    max-swallow-size: 10MB
+
+spring:
+  application:
+    name: x12-837-parser
+  servlet:
+    multipart:
+      # We accept raw text/plain bodies, never multipart uploads — turn off the
+      # auto-config so there is no parsing path we don't use.
+      enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
