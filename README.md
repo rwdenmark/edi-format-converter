@@ -1,4 +1,4 @@
-# X12 837 Parser
+# X12 Parser
 
 Web service that parses X12 837 healthcare claim files (Professional, Institutional, Dental) into structured JSON. Spring Boot backend with a single-page static frontend.
 
@@ -132,10 +132,3 @@ The parser tests round-trip all three sample claims and assert the variant detec
 ## Deploying
 
 Same pattern as `wow-explorer` and `ranger-survivor`. Render web service, Java 21 runtime, `./mvnw -DskipTests package` build, `java -jar target/x12-837-parser-0.0.1-SNAPSHOT.jar` start command.
-
-## What's next
-
-- Friendly JSON keys via a mapping config (NM1 → `name`, CLM → `claim`, etc.).
-- TR3 validation pass — required segments per loop, element data types, code list checks. Emit errors per SNIP level.
-- 277CA acknowledgment generation for parsed claims.
-- 837 → FHIR Claim resource translator (bridge to modern healthcare standards).
