@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>X12 / JSON / YAML / XML Converter</title>
+    <title>EDI Format Converter</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         :root {
@@ -38,7 +38,7 @@
         .fmtgroup button.active { background: #2e343f; color: var(--text); font-weight: 600; }
         textarea, pre { flex: 1; margin: 0; padding: 14px; background: #1e2530; color: var(--text);
             border: none; outline: none; resize: none; font: 12px/1.55 var(--mono);
-            white-space: pre; overflow: auto; }
+            white-space: pre-wrap; overflow-wrap: anywhere; overflow-x: hidden; overflow-y: auto; }
         .error { color: var(--error); }
         .spacer { flex: 1; }
         .status { font-size: 12px; color: var(--muted); }
@@ -51,7 +51,7 @@
 </head>
 <body>
 <header>
-    <h1>Format Converter</h1>
+    <h1>EDI Format Converter</h1>
 </header>
 <div class="samplebar">
     <span class="lbl">Samples:</span>
@@ -170,4 +170,3 @@
 </script>
 </body>
 </html>
-                                                                                                                                                                                 

@@ -26,6 +26,9 @@ public class ConversionService {
     }
 
     public String convert(Format from, Format to, String payload) {
+        if (from == to) {
+            return payload;
+        }
         return write(to, read(from, payload));
     }
 
