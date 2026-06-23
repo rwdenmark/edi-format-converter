@@ -116,7 +116,7 @@
         status.textContent = "Converting...";
         result.classList.remove("error");
         try {
-            const resp = await fetch("/api/convert?from=" + srcFmt + "&to=" + dstFmt, {
+            const resp = await fetch("api/convert?from=" + srcFmt + "&to=" + dstFmt, {
                 method: "POST",
                 headers: { "Content-Type": "text/plain" },
                 body: source.value,
@@ -144,7 +144,7 @@
 
     document.querySelectorAll("[data-sample]").forEach(btn => btn.addEventListener("click", async () => {
         const id = btn.dataset.sample;
-        const resp = await fetch("/api/samples/" + id);
+        const resp = await fetch("api/samples/" + id);
         source.value = await resp.text();
         document.querySelectorAll(".sample").forEach(x => x.classList.remove("active"));
         btn.classList.add("active");
