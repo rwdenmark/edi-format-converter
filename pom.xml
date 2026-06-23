@@ -12,10 +12,10 @@
     </parent>
 
     <groupId>com.rwdenmark</groupId>
-    <artifactId>x12-837-parser</artifactId>
+    <artifactId>edi-format-converter</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>x12-837-parser</name>
-    <description>Parse X12 837 (P/I/D) into JSON</description>
+    <name>edi-format-converter</name>
+    <description>Convert between X12 EDI (837 P/I/D), JSON, YAML, and XML</description>
 
     <properties>
         <java.version>21</java.version>
@@ -39,6 +39,14 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
         </dependency>
     </dependencies>
 

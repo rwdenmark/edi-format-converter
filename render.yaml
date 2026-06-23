@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: x12-parser
+    name: edi-format-converter
     runtime: docker
     plan: free
     dockerfilePath: ./Dockerfile

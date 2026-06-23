@@ -1,6 +1,6 @@
-# X12 Parser
+# EDI Format Converter
 
-Web service that parses X12 837 healthcare claim files (Professional, Institutional, Dental) into structured JSON. Spring Boot backend with a single-page static frontend.
+Web service that converts between X12 EDI (837 P/I/D), JSON, YAML, and XML. Parses X12 837 healthcare claims into a structured model and serializes to/from JSON, YAML, and XML. Spring Boot backend with a single-page static frontend.
 
 ## Stack
 
@@ -54,7 +54,7 @@ Segment names are kept as JSON keys in v1 (`NM1`, `CLM`, `SV1`, `SV2`, `SV3`). F
 ## File tour
 
 ```
-x12-parser/
+edi-format-converter/
 ├── pom.xml
 ├── system.properties           # pins Java 21 for Render
 ├── render.yaml                 # Render blueprint
@@ -128,7 +128,3 @@ curl -X POST http://localhost:8080/api/parse \
 ```
 
 The parser tests round-trip all three sample claims and assert the variant detection, hierarchy shape, and claim totals.
-
-## Deploying
-
-Same pattern as `wow-explorer` and `ranger-survivor`. Render web service, Java 21 runtime, `./mvnw -DskipTests package` build, `java -jar target/x12-837-parser-0.0.1-SNAPSHOT.jar` start command.
