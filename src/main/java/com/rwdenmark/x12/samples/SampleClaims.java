@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Built-in 837 samples bundled under {@code resources/samples/}. All three are public
- * reference claims from the TR3 implementation guides — no PHI.
+ * reference claims from the TR3 implementation guides, no PHI.
  */
 @Component
 public class SampleClaims {

@@ -153,7 +153,7 @@ public final class HierarchyBuilder {
                 case "CLM" -> startClaim(s);
                 case "LX" -> {
                     if (currentClaim == null) {
-                        // LX outside a CLM — treat as HL-level segment so we don't lose it.
+                        // LX outside a CLM, treat as HL-level segment so we don't lose it.
                         segments.add(segmentMap(s));
                     } else {
                         startServiceLine(s);

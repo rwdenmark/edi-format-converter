@@ -15,7 +15,7 @@ spring:
     name: x12-837-parser
   servlet:
     multipart:
-      # We accept raw text/plain bodies, never multipart uploads — turn off the
+      # We accept raw text/plain bodies, never multipart uploads, turn off the
       # auto-config so there is no parsing path we don't use.
       enabled: false
 

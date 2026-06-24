@@ -2,7 +2,7 @@ package com.rwdenmark.x12.parser;
 
 /**
  * Element, sub-element, segment, and repetition delimiters for an X12 interchange.
- * Always read from the ISA header — never hardcoded. Different senders use different values.
+ * Always read from the ISA header, never hardcoded. Different senders use different values.
  */
 public record Delimiters(char element, char subElement, char segment, char repetition) {
 

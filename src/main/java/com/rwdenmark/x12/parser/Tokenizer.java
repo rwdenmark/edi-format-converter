@@ -29,7 +29,7 @@ public final class Tokenizer {
 
     private static Segment parseSegment(String raw, Delimiters d) {
         // ISA is special: positions are fixed-width, so element splitting must be tolerant
-        // of trailing spaces (we preserve them as-is here — callers can trim).
+        // of trailing spaces (we preserve them as-is here, callers can trim).
         String[] parts = raw.split(java.util.regex.Pattern.quote(String.valueOf(d.element())), -1);
         String id = parts[0];
         List<String> elements = parts.length > 1

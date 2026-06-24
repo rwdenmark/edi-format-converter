@@ -1,35 +1,35 @@
 # EDI Format Converter
 
-Web service that converts between X12 EDI (837 P/I/D), JSON, YAML, and XML. Parses X12 837 healthcare claims into a structured model and serializes to/from JSON, YAML, and XML. Spring Boot backend with a single-page static frontend.
+Web service that converts between X12 EDI (837 P/I/D), JSON, YAML, and XML. It parses an X12 837 into a structured model and serializes that model to JSON, YAML, or XML, and JSON, YAML, and XML convert freely among themselves. Writing X12 back out is phase 2 (422 for now). Spring Boot backend with a two-pane static frontend.
 
 ## Stack
 
-- Spring Boot 3.4 on Java 21
-- Plain JS + HTML frontend served from `src/main/resources/static`
+- Spring Boot 3.4.1 on Java 21
+- Jackson (databind, YAML, and XML dataformats) for the conversions
+- Plain JS + HTML two-pane frontend served from `src/main/resources/static`
 - JUnit 5 fixtures use the official X12 TR3 sample claims
 
 ## What it does
 
-Accepts the raw text of a 5010 X12 837 file. Detects whether it's 837P (005010X222A1), 837I (005010X223A2), or 837D (005010X224A2). Returns nested JSON:
+Accepts the raw text of a 5010 X12 837 file. Detects whether it's 837P (005010X222A1), 837I (005010X223A2), or 837D (005010X224A2). Returns JSON keyed by the X12 structure:
 
 ```
 {
-  "envelope": { "isa": {...}, "gs": {...} },
   "variant": "837P",
-  "transactions": [
+  "envelope": { "isa": { ... } },
+  "functionalGroups": [
     {
-      "header": { "st": {...}, "bht": {...} },
-      "submitter": {...},
-      "receiver": {...},
-      "billingProviders": [
+      "gs": { ... },
+      "transactions": [
         {
-          "subscribers": [
+          "implementationId": "005010X222A1",
+          "header": { "bht": {...}, "submitter": {...}, "receiver": {...} },
+          "hierarchy": [
             {
-              "patients": [
-                {
-                  "claims": [ { "clm": {...}, "serviceLines": [...] } ]
-                }
-              ]
+              "levelCode": "20",
+              "hasChildren": true,
+              "claims": [ { "claimId": "...", "totalCharges": "...", "serviceLines": [...] } ],
+              "children": [ { "levelCode": "22", "children": [...] } ]
             }
           ]
         }
@@ -39,17 +39,19 @@ Accepts the raw text of a 5010 X12 837 file. Detects whether it's 837P (005010X2
 }
 ```
 
-Segment names are kept as JSON keys in v1 (`NM1`, `CLM`, `SV1`, `SV2`, `SV3`). Friendly field names is a v2 polish — bolt on via a mapping config.
+The HL loops are rebuilt into a real `hierarchy` tree by level code (20 billing provider, 22 subscriber, 23 patient), with claims and service lines hanging off the HL they belong to. Raw segment elements are kept under `segments` arrays so nothing is dropped. Friendly field names are a later polish.
 
 ## API
 
-| Method | Path              | Description                              |
-|--------|-------------------|------------------------------------------|
-| POST   | /api/parse        | `text/plain` body of raw 837. Returns JSON. |
-| GET    | /api/samples      | Lists built-in samples (P / I / D).      |
-| GET    | /api/samples/{id} | Returns one of the built-in sample 837s. |
-| GET    | /                 | Static frontend.                         |
-| GET    | /actuator/health  | Health check.                            |
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | /api/convert?from={fmt}&to={fmt} | `text/plain` body of the source. Returns the target format. `from`/`to` in {x12, json, yaml, xml}. X12 as `to` returns 422 (phase 2). |
+| POST | /api/parse | `text/plain` body of raw 837. Returns the parsed JSON model. |
+| GET | /api/samples | Lists the built-in samples (P / I / D). |
+| GET | /api/samples/{id} | Returns one built-in sample 837. |
+| GET | /api/health | Liveness probe. |
+| GET | /actuator/health | Actuator health. |
+| GET | / | Static two-pane frontend. |
 
 ## File tour
 
@@ -58,6 +60,7 @@ edi-format-converter/
 ├── pom.xml
 ├── system.properties           # pins Java 21 for Render
 ├── render.yaml                 # Render blueprint
+├── Dockerfile
 ├── mvnw, mvnw.cmd, .mvn/       # Maven wrapper
 └── src/
     ├── main/
@@ -65,6 +68,9 @@ edi-format-converter/
     │   │   ├── X12ParserApplication.java
     │   │   ├── common/GlobalExceptionHandler.java
     │   │   ├── config/WebConfig.java
+    │   │   ├── convert/
+    │   │   │   ├── Format.java
+    │   │   │   └── ConversionService.java
     │   │   ├── parser/
     │   │   │   ├── Delimiters.java
     │   │   │   ├── Segment.java
@@ -76,8 +82,10 @@ edi-format-converter/
     │   │   │   └── X12ParserService.java
     │   │   ├── samples/SampleClaims.java
     │   │   └── web/
+    │   │       ├── ConvertController.java
     │   │       ├── ParseController.java
-    │   │       └── SampleController.java
+    │   │       ├── SampleController.java
+    │   │       └── HealthController.java
     │   └── resources/
     │       ├── application.yml
     │       ├── static/index.html
@@ -87,11 +95,12 @@ edi-format-converter/
     │           └── 837d_dental.edi
     └── test/
         └── java/com/rwdenmark/x12/
+            ├── convert/ConversionServiceTest.java
             ├── parser/
             │   ├── TokenizerTest.java
-            │   ├── HierarchyBuilderTest.java
             │   └── X12ParserServiceTest.java
             └── web/
+                ├── ConvertControllerIT.java
                 └── ParseControllerIT.java
 ```
 
@@ -99,32 +108,4 @@ edi-format-converter/
 
 Three sample claims live in `src/main/resources/samples/`:
 
-- `837p_commercial.edi` — TR3 005010X222A1 Example 01 (commercial professional claim, Ben Kildare Service → Key Insurance, two office visits with throat / mono labs)
-- `837i_institutional.edi` — TR3 005010X223A2 Example 1a (institutional outpatient lab claim, Jones Hospital → Medicare B + State Teachers secondary)
-- `837d_dental.edi` — 005010X224A2 dental claim (Premier Billing Service → Insurance Company XYZ, two dental procedures)
-
-All three are public reference examples from the X12 implementation guides. No PHI. Do not paste real PHI into this tool.
-
-## Running locally
-
-Requires Java 21.
-
-```bash
-./mvnw spring-boot:run
-```
-
-App on http://localhost:8080.
-
-```bash
-curl -X POST http://localhost:8080/api/parse \
-  -H 'Content-Type: text/plain' \
-  --data-binary @src/main/resources/samples/837p_commercial.edi
-```
-
-## Tests
-
-```bash
-./mvnw test
-```
-
-The parser tests round-trip all three sample claims and assert the variant detection, hierarchy shape, and claim totals.
+- `837p_commercial.edi`: TR3 005010X222A1 Example 01 (commercial professional claim, Ben Kildare Service → Key Insurance, two office visits with throat

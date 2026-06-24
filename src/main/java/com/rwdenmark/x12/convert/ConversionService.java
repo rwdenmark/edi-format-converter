@@ -39,7 +39,6 @@ public class ConversionService {
                 case JSON -> json.readValue(payload, Object.class);
                 case YAML -> yaml.readValue(payload, Object.class);
                 case XML -> xml.readValue(payload, Object.class);
-                case STRING -> json.readValue(json.readValue(payload, String.class), Object.class);
             };
         } catch (ResponseStatusException e) {
             throw e;
@@ -55,7 +54,6 @@ public class ConversionService {
                 case JSON -> json.writerWithDefaultPrettyPrinter().writeValueAsString(model);
                 case YAML -> yaml.writeValueAsString(model);
                 case XML -> xml.writer().withRootName("x12").writeValueAsString(model);
-                case STRING -> json.writeValueAsString(json.writeValueAsString(model));
                 case X12 -> throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
                         "Writing X12 output is not supported yet (phase 2).");
             };
