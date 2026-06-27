@@ -1,5 +1,6 @@
 package com.rwdenmark.x12.parser;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,7 @@ public final class EnvelopeParser {
         }
         Map<String, Object> isa = mapIsa(segments.get(0));
 
-        java.util.List<FunctionalGroup> groups = new java.util.ArrayList<>();
+        List<FunctionalGroup> groups = new ArrayList<>();
         int gsStart = -1;
         Map<String, Object> currentGs = null;
         for (int i = 1; i < segments.size(); i++) {

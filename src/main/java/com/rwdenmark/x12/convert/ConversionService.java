@@ -1,6 +1,7 @@
 package com.rwdenmark.x12.convert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.rwdenmark.x12.parser.X12ParserService;
@@ -11,7 +12,9 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * Canonical-model converter. Every format is read into a plain Object graph
  * (Map / List / scalar) and written back out of it. X12 is read by the existing
- * parser; writing X12 back out is phase 2.
+ * parser and written by {@link X12Writer} (valid output, not byte-identical to a
+ * source file). STRING is the JSON-escape helper: it reads an escaped JSON string
+ * literal back into a model, and writes a model out as an escaped JSON string literal.
  */
 @Service
 public class ConversionService {
@@ -19,10 +22,16 @@ public class ConversionService {
     private final X12ParserService x12;
     private final ObjectMapper json = new ObjectMapper();
     private final YAMLMapper yaml = new YAMLMapper();
-    private final XmlMapper xml = new XmlMapper();
+    private final XmlMapper xml = newIndentingXmlMapper();
 
     public ConversionService(X12ParserService x12) {
         this.x12 = x12;
+    }
+
+    private static XmlMapper newIndentingXmlMapper() {
+        XmlMapper mapper = new XmlMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        return mapper;
     }
 
     public String convert(Format from, Format to, String payload) {
@@ -39,6 +48,7 @@ public class ConversionService {
                 case JSON -> json.readValue(payload, Object.class);
                 case YAML -> yaml.readValue(payload, Object.class);
                 case XML -> xml.readValue(payload, Object.class);
+                case STRING -> json.readValue(json.readValue(payload, String.class), Object.class);
             };
         } catch (ResponseStatusException e) {
             throw e;
@@ -54,8 +64,8 @@ public class ConversionService {
                 case JSON -> json.writerWithDefaultPrettyPrinter().writeValueAsString(model);
                 case YAML -> yaml.writeValueAsString(model);
                 case XML -> xml.writer().withRootName("x12").writeValueAsString(model);
-                case X12 -> throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-                        "Writing X12 output is not supported yet (phase 2).");
+                case STRING -> json.writeValueAsString(json.writeValueAsString(model));
+                case X12 -> X12Writer.write(model);
             };
         } catch (ResponseStatusException e) {
             throw e;

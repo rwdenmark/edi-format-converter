@@ -35,7 +35,7 @@ public class ConvertController {
             case JSON -> MediaType.APPLICATION_JSON;
             case XML -> MediaType.APPLICATION_XML;
             case YAML -> MediaType.valueOf("application/x-yaml");
-            case X12 -> MediaType.TEXT_PLAIN;
+            case X12, STRING -> MediaType.TEXT_PLAIN;
         };
     }
 }

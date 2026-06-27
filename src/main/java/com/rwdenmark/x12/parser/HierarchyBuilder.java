@@ -82,7 +82,7 @@ public final class HierarchyBuilder {
                     }
                 }
                 case "PER" -> submitterContacts.add(seg);
-                default -> { /* ignore other header segments for now */ }
+                default -> { /* other table-1 header segments are not modeled */ }
             }
         }
         if (submitter != null) {
@@ -138,7 +138,6 @@ public final class HierarchyBuilder {
         final List<Map<String, Object>> claims = new ArrayList<>();
         Map<String, Object> currentClaim;
         List<Map<String, Object>> currentClaimSegments;
-        Map<String, Object> currentServiceLine;
         List<Map<String, Object>> currentServiceLineSegments;
 
         HlNode(Segment hl) {
@@ -179,20 +178,19 @@ public final class HierarchyBuilder {
             currentClaimSegments = new ArrayList<>();
             currentClaim.put("segments", currentClaimSegments);
             currentClaim.put("serviceLines", new ArrayList<Map<String, Object>>());
-            currentServiceLine = null;
             currentServiceLineSegments = null;
             claims.add(currentClaim);
         }
 
         private void startServiceLine(Segment lx) {
-            currentServiceLine = new LinkedHashMap<>();
-            currentServiceLine.put("lineNumber", lx.element(0));
+            Map<String, Object> serviceLine = new LinkedHashMap<>();
+            serviceLine.put("lineNumber", lx.element(0));
             currentServiceLineSegments = new ArrayList<>();
-            currentServiceLine.put("segments", currentServiceLineSegments);
+            serviceLine.put("segments", currentServiceLineSegments);
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> lines =
                     (List<Map<String, Object>>) currentClaim.get("serviceLines");
-            lines.add(currentServiceLine);
+            lines.add(serviceLine);
         }
 
         Map<String, Object> toJson() {

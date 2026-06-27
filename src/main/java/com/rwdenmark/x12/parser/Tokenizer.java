@@ -3,6 +3,7 @@ package com.rwdenmark.x12.parser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Splits a raw 837 string into a list of {@link Segment} records, using delimiters
@@ -17,7 +18,7 @@ public final class Tokenizer {
         if (raw == null || raw.isBlank()) {
             throw new X12ParseException("Empty input.");
         }
-        String[] segmentChunks = raw.split(java.util.regex.Pattern.quote(String.valueOf(d.segment())));
+        String[] segmentChunks = raw.split(Pattern.quote(String.valueOf(d.segment())));
         List<Segment> segments = new ArrayList<>(segmentChunks.length);
         for (String chunk : segmentChunks) {
             String trimmed = chunk.strip();
@@ -28,9 +29,8 @@ public final class Tokenizer {
     }
 
     private static Segment parseSegment(String raw, Delimiters d) {
-        // ISA is special: positions are fixed-width, so element splitting must be tolerant
-        // of trailing spaces (we preserve them as-is here, callers can trim).
-        String[] parts = raw.split(java.util.regex.Pattern.quote(String.valueOf(d.element())), -1);
+        // -1 keeps trailing empty elements so element numbers line up with list indices.
+        String[] parts = raw.split(Pattern.quote(String.valueOf(d.element())), -1);
         String id = parts[0];
         List<String> elements = parts.length > 1
                 ? new ArrayList<>(Arrays.asList(parts).subList(1, parts.length))

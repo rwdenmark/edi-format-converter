@@ -2,6 +2,7 @@ package com.rwdenmark.x12.samples;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -31,7 +32,7 @@ public class SampleClaims {
     }
 
     public Map<String, Sample> all() {
-        return samples;
+        return Collections.unmodifiableMap(samples);
     }
 
     public String content(String id) {

@@ -4,11 +4,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/**
- * CORS configuration so the GitHub Pages portfolio site (and a local Spring Boot dev
- * server) can POST to the parser. Add or remove allowed origins here when the demo
- * moves or gets embedded somewhere new.
- */
+/** CORS so the GitHub Pages portfolio and local dev server can POST to the API. */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 

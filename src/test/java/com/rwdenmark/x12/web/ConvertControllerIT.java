@@ -11,6 +11,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -40,10 +42,33 @@ class ConvertControllerIT {
     }
 
     @Test
-    void writingX12Returns422() throws Exception {
+    void jsonToStringReturnsEscapedPlainText() throws Exception {
+        mockMvc.perform(post("/api/convert").param("from", "json").param("to", "string")
+                        .contentType(MediaType.TEXT_PLAIN).content("{\"a\":1}"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN))
+                .andExpect(content().string(startsWith("\"")));
+    }
+
+    @Test
+    void jsonModelToX12ReturnsInterchange() throws Exception {
+        String model = mockMvc.perform(post("/api/convert").param("from", "x12").param("to", "json")
+                        .contentType(MediaType.TEXT_PLAIN).content(sample()))
+                .andReturn().getResponse().getContentAsString();
+
+        mockMvc.perform(post("/api/convert").param("from", "json").param("to", "x12")
+                        .contentType(MediaType.TEXT_PLAIN).content(model))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN))
+                .andExpect(content().string(startsWith("ISA")));
+    }
+
+    @Test
+    void writingX12FromNonModelReturns422() throws Exception {
         mockMvc.perform(post("/api/convert").param("from", "json").param("to", "x12")
                         .contentType(MediaType.TEXT_PLAIN).content("{}"))
-                .andExpect(status().isUnprocessableEntity());
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(content().string(containsString("not a parsed X12 model")));
     }
 
     @Test
@@ -51,6 +76,15 @@ class ConvertControllerIT {
         mockMvc.perform(post("/api/convert").param("from", "bogus").param("to", "json")
                         .contentType(MediaType.TEXT_PLAIN).content("{}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void conversionErrorReturnsReadablePlainText() throws Exception {
+        mockMvc.perform(post("/api/convert").param("from", "json").param("to", "yaml")
+                        .contentType(MediaType.TEXT_PLAIN).content("}{ not json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN))
+                .andExpect(content().string(containsString("Could not read input as JSON")));
     }
 
     private static String sample() throws IOException {

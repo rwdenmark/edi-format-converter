@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="X12ParserApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <module name="edi-format-converter" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.rwdenmark.x12.X12ParserApplication" />
+    <!-- Silences the Tomcat JNI "restricted method in java.lang.System" warning on newer JDKs. -->
+    <option name="VM_PARAMETERS" value="--enable-native-access=ALL-UNNAMED" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

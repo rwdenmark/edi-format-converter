@@ -1,12 +1,12 @@
 # EDI Format Converter
 
-Web service that converts between X12 EDI (837 P/I/D), JSON, YAML, and XML. It parses an X12 837 into a structured model and serializes that model to JSON, YAML, or XML, and JSON, YAML, and XML convert freely among themselves. Writing X12 back out is phase 2 (422 for now). Spring Boot backend with a two-pane static frontend.
+Web service that converts between X12 EDI (837 P/I/D), JSON, YAML, and XML. It parses an X12 837 into a structured model and serializes that model to JSON, YAML, or XML, and JSON, YAML, and XML convert freely among themselves. Writing X12 back out produces a valid interchange (regenerated ISA padding and control counts, not byte-identical to the source). Spring Boot backend with a two-pane static frontend.
 
 ## Stack
 
 - Spring Boot 3.4.1 on Java 21
 - Jackson (databind, YAML, and XML dataformats) for the conversions
-- Plain JS + HTML two-pane frontend served from `src/main/resources/static`
+- Plain JS + HTML two-pane frontend served from `src/main/resources/static`. The left pane is a free text box that auto-detects the source format (X12 / JSON / YAML / XML, else TEXT); the right pane picks the target (X12 / JSON / YAML / XML / String)
 - JUnit 5 fixtures use the official X12 TR3 sample claims
 
 ## What it does
@@ -45,7 +45,7 @@ The HL loops are rebuilt into a real `hierarchy` tree by level code (20 billing 
 
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | /api/convert?from={fmt}&to={fmt} | `text/plain` body of the source. Returns the target format. `from`/`to` in {x12, json, yaml, xml}. X12 as `to` returns 422 (phase 2). |
+| POST | /api/convert?from={fmt}&to={fmt} | `text/plain` body of the source. Returns the target format. `from`/`to` in {x12, json, yaml, xml, string}. `string` is the JSON-escape helper (model to an escaped JSON string literal and back). X12 as `to` writes a valid interchange (not byte-identical to the source). Errors come back as plain-text messages, not the default `/error` JSON. |
 | POST | /api/parse | `text/plain` body of raw 837. Returns the parsed JSON model. |
 | GET | /api/samples | Lists the built-in samples (P / I / D). |
 | GET | /api/samples/{id} | Returns one built-in sample 837. |
@@ -70,7 +70,8 @@ edi-format-converter/
     │   │   ├── config/WebConfig.java
     │   │   ├── convert/
     │   │   │   ├── Format.java
-    │   │   │   └── ConversionService.java
+    │   │   │   ├── ConversionService.java
+    │   │   │   └── X12Writer.java
     │   │   ├── parser/
     │   │   │   ├── Delimiters.java
     │   │   │   ├── Segment.java

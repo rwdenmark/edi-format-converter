@@ -12,7 +12,7 @@ server:
 
 spring:
   application:
-    name: x12-837-parser
+    name: edi-format-converter
   servlet:
     multipart:
       # We accept raw text/plain bodies, never multipart uploads, turn off the
