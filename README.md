@@ -109,4 +109,8 @@ edi-format-converter/
 
 Three sample claims live in `src/main/resources/samples/`:
 
-- `837p_commercial.edi`: TR3 005010X222A1 Example 01 (commercial professional claim, Ben Kildare Service → Key Insurance, two office visits with throat
+- `837p_commercial.edi`: TR3 005010X222A1 Example 01 (commercial professional claim, Ben Kildare Service → Key Insurance, two office visits with a throat culture).
+- `837i_institutional.edi`: TR3 005010X223A2 (institutional claim, Jones Hospital → Medicare).
+- `837d_dental.edi`: TR3 005010X224A2 (dental claim, Premier Billing Service).
+
+Each is a public TR3 implementation-guide example, so no real PHI is included. Point the parser at any of them to see the JSON output.
